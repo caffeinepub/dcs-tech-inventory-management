@@ -1,0 +1,100 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T20:53:45.346Z",
+  "summary": "The diff implements a substantial portion of the build request. The backend Motoko actor, frontend pages, components, hooks, and theme system are all present. However, there are several gaps and deviations: the theme CSS is embedded in index.css rather than a dedicated theme.css file; the backend imports from multiple authorization/approval module files which may violate the single-actor constraint; a ProfileSetupModal with name/email setup is added without being requested; extra inventory fields (price, supplier, expirationDate, barcode) are added beyond the spec; and the exact token names required by REQ-2 are not used.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Define a single CSS theme file (e.g., frontend/src/styles/theme.css) using CSS custom properties for all color tokens. Import this file globally.",
+      "reason": "The theme tokens are defined inside frontend/src/index.css rather than a dedicated standalone theme.css file. No frontend/src/styles/theme.css file exists in the diff.",
+      "evidence": [
+        "frontend/src/index.css"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Tokens must cover the exact names: background-primary, background-secondary, text-primary, text-muted, text-disabled, border-color, accent-primary, accent-primary-hover, accent-foreground.",
+      "reason": "The CSS uses Shadcn/Tailwind token names (--background, --foreground, --primary, etc.) rather than the exact token names required by the spec (--background-primary, --background-secondary, --text-primary, --text-muted, --text-disabled, --border-color, --accent-primary, --accent-primary-hover, --accent-foreground).",
+      "evidence": [
+        "frontend/src/index.css"
+      ]
+    },
+    {
+      "id": "REQ-1",
+      "requirement": "All Motoko logic must reside in a single actor in backend/main.mo per the build constraints.",
+      "reason": "The backend/main.mo imports logic from separate module files (authorization/access-control, authorization/MixinAuthorization, user-approval/approval), which may violate the constraint that all logic reside in a single actor file.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "ProfileSetupModal component that prompts users to enter their full name and email after login, plus saveCallerUserProfile and getCallerUserProfile backend API calls.",
+      "reason": "The build request does not include a profile setup flow or modal for entering name/email. The User data model only specifies email — there is no 'name' field in the spec. The ProfileSetupModal and useSaveCallerUserProfile hook are entirely unspecified.",
+      "evidence": [
+        "frontend/src/components/ProfileSetupModal.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "Extra InventoryItem fields: price (Float), supplier (Text), expirationDate (?Int), barcode (Text) added to the data model and AddItemModal form.",
+      "reason": "The spec defines InventoryItem with exactly: id, name, sku, category, quantity, unit, lowStockThreshold, description, createdAt, updatedAt. The fields price, supplier, expirationDate, and barcode were not requested.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/components/AddItemModal.tsx"
+      ]
+    },
+    {
+      "description": "Access control initialization via _initializeAccessControlWithSecret() and caffeineAdminToken URL parameter handling.",
+      "reason": "The spec does not mention any admin token initialization, secret parameter, or access control seeding mechanism. The useActor.ts hook calls actor._initializeAccessControlWithSecret(adminToken) and reads caffeineAdminToken from URL params, which is an unspecified feature.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts",
+        "frontend/src/utils/urlParams.ts"
+      ]
+    },
+    {
+      "description": "Extra backend functions: requestApproval(), isCallerApproved(), listApprovals(), and setApproval() exposed on the actor beyond the specified API.",
+      "reason": "The spec defines a fixed list of backend functions. These four functions are not among the specified ones.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "UserProfile includes a 'name' field not present in the spec's User data model.",
+      "reason": "The spec's User model defines: principal, email, role, status, createdAt, lastLoginAt. The implemented UserProfile adds a 'name: Text' field which was not requested.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.63,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AddItemModal.tsx",
+    "frontend/src/components/InventoryItemDetail.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/ThemeToggle.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useTheme.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/AdminPanel.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/Inventory.tsx",
+    "frontend/src/pages/Login.tsx",
+    "frontend/src/pages/Reports.tsx",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

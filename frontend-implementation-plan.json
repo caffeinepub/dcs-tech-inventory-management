@@ -1,0 +1,290 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "DCS Tech Inventory Management Application — Frontend Implementation",
+  "requirements": [
+    {
+      "id": "REQ-2",
+      "summary": "Define a single CSS theme file with light and dark mode color tokens that are visually distinct",
+      "acceptanceCriteria": [
+        "A single theme CSS file exists and is imported at the app root",
+        "All color tokens are defined as CSS custom properties under :root (light) and [data-theme='dark'] or .dark selectors",
+        "Light mode and dark mode are visually distinct — backgrounds, text, and accents differ clearly",
+        "No token produces identical grayscale values in both modes",
+        "Switching theme immediately updates all themed surfaces without page reload"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/styles/theme.css",
+          "operation": "create",
+          "description": "Create a single CSS theme file defining all color tokens as CSS custom properties. Include :root selector for light mode tokens (white/light-gray backgrounds, dark text, indigo primary accent) and [data-theme='dark'] or .dark selector for dark mode tokens (dark navy/dark-gray backgrounds, light text, same indigo primary accent). Define tokens for: background-primary, background-secondary, text-primary, text-muted, text-disabled, border-color, accent-primary, accent-primary-hover, accent-foreground, destructive, success, warning. Ensure no token resolves to identical grayscale values in both modes."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Import the theme.css file at the top of index.css to ensure all components have access to the CSS custom properties globally."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement a persistent light/dark theme toggle in the header with localStorage support",
+      "acceptanceCriteria": [
+        "Theme toggle button is visible in the header on all pages",
+        "Clicking the toggle switches between light and dark mode immediately",
+        "Selected theme persists across page reloads via localStorage",
+        "Sun icon shown in dark mode, moon icon shown in light mode (or equivalent clear icons)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useTheme.ts",
+          "operation": "create",
+          "description": "Create a custom hook that manages theme state using localStorage. On mount, read the stored theme preference or default to light mode. Provide a toggle function that switches between light and dark, updates localStorage, and applies the theme to the document root by setting a data-theme attribute or adding/removing a .dark class."
+        },
+        {
+          "path": "frontend/src/components/ThemeToggle.tsx",
+          "operation": "create",
+          "description": "Create a ThemeToggle component that uses the useTheme hook. Render a button with sun/moon icons (use lucide-react icons) that calls the toggle function on click. Show sun icon in dark mode and moon icon in light mode."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Implement Internet Identity authentication with role-based access control and pending user flow",
+      "acceptanceCriteria": [
+        "Unauthenticated users see only the Login page",
+        "After Internet Identity sign-in, registerOrLogin() is called and the user profile is fetched",
+        "Users with #pending status see a pending-approval message and cannot access app pages",
+        "Users with #rejected status see an access-denied message",
+        "Approved users are routed to the Dashboard",
+        "Role-based UI elements (Add Item button, Admin Panel link, adjust controls) are shown/hidden per role"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useAuth.ts",
+          "operation": "create",
+          "description": "Create a useAuth hook that combines Internet Identity authentication with user profile and approval status. Use useInternetIdentity for authentication state, call registerOrLogin() after successful login, fetch the user profile using getCallerUserProfile() and approval status using isCallerApproved(). Return: isAuthenticated, isApproved, userProfile, isLoading, and role. Verify the authorization component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/ProtectedRoute.tsx",
+          "operation": "create",
+          "description": "Create a ProtectedRoute wrapper component that uses useAuth to check authentication and approval status. If not authenticated, redirect to Login. If authenticated but pending approval, show a pending-approval message screen. If rejected, show an access-denied message screen. If approved, render children. Accept an optional adminOnly prop to restrict routes to admin users only. Verify the authorization and user-approval components usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/ProfileSetupModal.tsx",
+          "operation": "create",
+          "description": "Create a ProfileSetupModal component using Shadcn Dialog that prompts new users to enter their name and email. Use saveCallerUserProfile() to save the profile. Show the modal only when isAuthenticated is true, profile is null, and profile data has been fetched (to avoid flash). Apply an explicit solid opaque background color via className on DialogContent. Verify the authorization component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Set up React Router with routes for all pages: /login (public, Login component), / (protected, redirects to /dashboard), /dashboard (protected, Dashboard component), /inventory (protected, Inventory component), /reports (protected, Reports component with staff/admin access), /admin (protected with adminOnly, AdminPanel component). Wrap protected routes with ProtectedRoute. Ensure unauthenticated users are redirected to /login. Include ProfileSetupModal at the root level to handle first-time user profile setup."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Build the Login page with DCS Tech branding and Internet Identity sign-in",
+      "acceptanceCriteria": [
+        "Login page renders the DCS Tech brand name prominently",
+        "Internet Identity sign-in button is centered and clearly labeled",
+        "Page respects light and dark theme tokens",
+        "No sidebar or nav menu is shown on the login page"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Login.tsx",
+          "operation": "create",
+          "description": "Create the Login page component. Display the DCS Tech brand name/logo text prominently at the top, include a brief tagline, and center an Internet Identity sign-in button using useInternetIdentity's login function. Use theme tokens from theme.css for backgrounds and text. Render the generated logo image using the workspace file path frontend/public/assets/generated/dcs-tech-logo.dim_128x128.png. Do not render any navigation sidebar or header on this page."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Build a responsive layout shell with sidebar navigation and header",
+      "acceptanceCriteria": [
+        "Desktop: sidebar is always visible with solid opaque background",
+        "Mobile: hamburger icon toggles a drawer with solid opaque background",
+        "Active route is highlighted in the sidebar/drawer",
+        "Admin Panel link only appears for admin users",
+        "Sign-out button signs out via Internet Identity and returns to Login page",
+        "No blur or opacity effects on sidebar/drawer backgrounds"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "create",
+          "description": "Create a Layout component that wraps authenticated pages. Include a fully opaque sidebar on desktop with navigation links (Dashboard, Inventory, Reports, Admin Panel). On mobile, show a hamburger icon that toggles a fully opaque drawer with the same links. Use solid background colors from theme tokens (no backdropFilter blur or bg-opacity). Highlight the active route. Show Admin Panel link only if the user role is admin (use useAuth). Include a header with the app title, ThemeToggle component, and a user indicator with sign-out option that calls clear() from useInternetIdentity and clears the React Query cache."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Build the Dashboard page with summary cards, low stock alerts, and recent activity",
+      "acceptanceCriteria": [
+        "Four summary cards display correct counts from backend data",
+        "Total Users card is only visible to admins",
+        "Clicking the Low Stock Alerts section header navigates to Inventory with low-stock filter active",
+        "Clicking an individual low-stock item opens its detail view on the Inventory page",
+        "Recent Activity log lists at least the 10 most recent adjustment log entries",
+        "Loading skeleton shown while data is fetching",
+        "Empty state message shown when no low-stock items or no activity exists"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useInventoryItems.ts",
+          "operation": "create",
+          "description": "Create a React Query hook to fetch inventory items using getInventoryItems(). Return the query result with data, isLoading, and error states."
+        },
+        {
+          "path": "frontend/src/hooks/useAdjustmentLogs.ts",
+          "operation": "create",
+          "description": "Create a React Query hook to fetch adjustment logs using getAdjustmentLogs(). Return the query result with data, isLoading, and error states."
+        },
+        {
+          "path": "frontend/src/hooks/useAllUsers.ts",
+          "operation": "create",
+          "description": "Create a React Query hook to fetch all users using getAllUsers(). This is admin-only, so handle errors gracefully. Return the query result with data, isLoading, and error states."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "create",
+          "description": "Create the Dashboard page component wrapped in Layout. Display four summary cards: Total Items (count from inventory items), Low Stock Count (items where quantity <= lowStockThreshold), Total Users (admin-only, count from getAllUsers), Recent Activity Count (count of adjustment logs). Show loading skeletons while data is fetching. Include a Low Stock Alerts section: clicking the section header navigates to /inventory?filter=low-stock; clicking an individual low-stock item navigates to /inventory?itemId=<id>. Include a Recent Activity log showing the latest 10 adjustment log entries with timestamp, user email, item name, and action. Show empty-state messages when no data exists."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Build the Inventory page with filterable table, detail overlay, and Add Item form",
+      "acceptanceCriteria": [
+        "All inventory items returned by getInventoryItems() are displayed in the table",
+        "Stock-status filter correctly filters rows to All / Low Stock / In Stock",
+        "Pre-applied low-stock filter from Dashboard navigation activates correctly on page load",
+        "Clicking a row opens the InventoryItemDetail overlay for that item",
+        "Admin users see an Add Item button; non-admins do not",
+        "Add Item form calls addInventoryItem() and refreshes the list on success",
+        "Empty state shown when no items match the filter"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Inventory.tsx",
+          "operation": "create",
+          "description": "Create the Inventory page component wrapped in Layout. Fetch inventory items using useInventoryItems. Display a filterable table/grid with columns: Name, SKU, Category, Quantity, Unit, Low-Stock Threshold, Status (badge: In Stock if quantity > lowStockThreshold, Low Stock otherwise). Provide a stock-status filter control (All, Low Stock, In Stock) and read URL query parameters (?filter=low-stock or ?itemId=<id>) to pre-apply filters or open detail overlays on page load. Clicking any row opens the InventoryItemDetail component. Admin users see an 'Add Item' button that opens an AddItemModal. Show loading and empty states."
+        },
+        {
+          "path": "frontend/src/components/AddItemModal.tsx",
+          "operation": "create",
+          "description": "Create an AddItemModal component using Shadcn Dialog with an explicit solid opaque background via className on DialogContent. Include a form with fields: name, sku, category, quantity, unit, lowStockThreshold, description, price, supplier, expirationDate, barcode. Use React Hook Form for validation. On submit, call addInventoryItem() and invalidate the inventory items query. Show toast on success or error."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Build the InventoryItemDetail overlay with adjustment history and stock controls",
+      "acceptanceCriteria": [
+        "InventoryItemDetail renders with an explicit solid background color via className on DialogContent",
+        "No bg-opacity, opacity, or backdropFilter applied to the dialog content",
+        "All item fields are visible and readable in both light and dark modes",
+        "Adjustment history table shows all logs for that item",
+        "Staff and Admin see Add Stock and Remove Stock controls with a quantity input",
+        "Submitting an adjustment calls adjustInventory() and refreshes the item and logs",
+        "Guest users see the detail view read-only with no adjustment controls",
+        "Toast shown on adjustment success or error",
+        "Dark semi-transparent backdrop is rendered behind the dialog"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/InventoryItemDetail.tsx",
+          "operation": "create",
+          "description": "Create an InventoryItemDetail component using Shadcn Dialog. Apply an explicit solid opaque background color via className on DialogContent (do not use bg-opacity or backdropFilter). Display all item fields: name, SKU, category, quantity, unit, low-stock threshold, description. Fetch and display the item's adjustment history by filtering adjustment logs where log.itemId === item.id, showing columns: timestamp, user email, type (Add/Remove badge), amount, new quantity, notes. For Staff and Admin users (check role via useAuth), show Add Stock and Remove Stock controls with a quantity input and notes field that call adjustInventory() and invalidate both inventory items and adjustment logs queries. Guest users see read-only view. Show toast on success or error. Render a dark semi-transparent backdrop behind the dialog."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Build the Admin Panel page with User Management tab",
+      "acceptanceCriteria": [
+        "Admin Panel route redirects non-admin users away",
+        "All users returned by getAllUsers() are listed with all required columns",
+        "Role selector changes persist: after selecting a new role, the list refetches and shows the updated role without page reload",
+        "Approve/Reject buttons appear only for pending users and update status on click",
+        "Delete button opens a fully opaque confirmation dialog before deletion",
+        "Confirmation dialog uses Shadcn Dialog with explicit opaque background via className, no blur or opacity",
+        "After deletion, user disappears from the list immediately",
+        "Toast shown for all success and error actions"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "create",
+          "description": "Create the AdminPanel page component wrapped in Layout and ProtectedRoute with adminOnly prop. Include a User Management tab that lists all users from getAllUsers() with columns: Principal ID (truncated), Email, Created Date/Time, Last Login Date/Time, Role Badge, Status Badge. Each row includes: an inline role selector dropdown (admin/staff/guest) that calls updateUserRole() on change and immediately invalidates and refetches the user list; Approve and Reject buttons for pending users that call approveUser()/rejectUser() and refresh the list; and a Delete button that opens a fully opaque confirmation dialog (Shadcn Dialog with explicit opaque className on DialogContent, no blur or opacity) before calling deleteUser(). Show toast on all success and error actions. Add a 'Demo Data' section with two buttons: 'Seed Demo Inventory' and 'Seed Demo Users' that call the corresponding backend functions with loading states and toasts."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Build the Reports page with filterable adjustment log table",
+      "acceptanceCriteria": [
+        "Reports page is accessible to admin and staff; guests are blocked or see read-only with no adjustment data if role allows",
+        "All adjustment logs from getAdjustmentLogs() are displayed",
+        "Date range filter correctly limits displayed rows",
+        "Item name filter correctly limits displayed rows",
+        "Add/Remove type is shown as a distinct colored badge",
+        "Empty state shown when no logs match the filter",
+        "Loading state shown during fetch"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Reports.tsx",
+          "operation": "create",
+          "description": "Create the Reports page component wrapped in Layout and ProtectedRoute (accessible to Admin and Staff only). Fetch adjustment logs using useAdjustmentLogs. Display a table with columns: Date/Time, Item Name, User (email), Adjustment Type (Add/Remove badge with distinct colors), Amount, New Quantity, Notes. Provide filter controls for date range (start date, end date using date pickers) and item name (search input or select). Apply filters client-side. Show loading skeleton during fetch and empty state when no logs match the filter."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Implement global toast notifications and loading states",
+      "acceptanceCriteria": [
+        "Success toast appears after each successful mutation",
+        "Error toast appears when any backend call fails",
+        "Loading spinners or skeleton loaders shown during initial data fetch on each page",
+        "Toasts auto-dismiss after a reasonable timeout"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useInventoryMutations.ts",
+          "operation": "create",
+          "description": "Create a custom hook that wraps React Query mutations for inventory operations: addInventoryItem, adjustInventory, updateInventoryItem. Each mutation shows a success toast on success and an error toast on failure. Invalidate relevant queries (inventory items, adjustment logs) after successful mutations."
+        },
+        {
+          "path": "frontend/src/hooks/useUserMutations.ts",
+          "operation": "create",
+          "description": "Create a custom hook that wraps React Query mutations for user operations: updateUserRole, approveUser, rejectUser, deleteUser, saveCallerUserProfile. Each mutation shows a success toast on success and an error toast on failure. Invalidate relevant queries (all users, approvals) after successful mutations."
+        },
+        {
+          "path": "frontend/src/hooks/useAdminMutations.ts",
+          "operation": "create",
+          "description": "Create a custom hook that wraps React Query mutations for admin operations: seedDemoInventory, seedDemoUsers. Each mutation shows a success toast on success and an error toast on failure. Invalidate relevant queries (inventory items, all users) after successful mutations."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Add demo data seeding buttons in the Admin Panel",
+      "acceptanceCriteria": [
+        "Both seed buttons are visible only to admins in the Admin Panel",
+        "Clicking each button calls the corresponding backend function",
+        "Loading indicator shown during the async call",
+        "Success toast shown after seeding completes; error toast shown on failure",
+        "Inventory list and user list refresh after seeding"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Ensure the 'Demo Data' section created in REQ-10 includes two buttons: 'Seed Demo Inventory' (calls seedDemoInventory()) and 'Seed Demo Users' (calls seedDemoUsers()). Use React Query mutations wrapped in useAdminMutations hook. Show loading state on each button while the call is in progress. Display success or error toast on completion. Invalidate inventory items and all users queries after successful seeding."
+        }
+      ]
+    }
+  ]
+}

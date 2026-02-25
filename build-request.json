@@ -1,0 +1,325 @@
+{
+  "kind": "build_request",
+  "title": "DCS Tech Inventory Management Application — Full Build",
+  "projectName": "DCS Tech Inventory",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement the Motoko backend single actor with the following data models and all specified functions: User (principal, email: Text, role: #admin/#staff/#guest, status: #pending/#approved/#rejected, createdAt: Int, lastLoginAt: Int), InventoryItem (id: Nat, name, sku, category, quantity: Nat, unit, lowStockThreshold: Nat, description, createdAt: Int, updatedAt: Int), AdjustmentLog (id: Nat, itemId: Nat, itemName, adjustedBy: Principal, adjustedByEmail, adjustmentType: #add/#remove, amount: Nat, newQuantity: Nat, notes, timestamp: Int). Implement all backend functions: registerOrLogin(), getMyProfile(), getAllUsers() [admin only], updateUserRole(principal, role) [admin only, must persist reliably], deleteUser(principal) [admin only], approveUser(principal) [admin only], rejectUser(principal) [admin only], getInventoryItems() [all approved users], addInventoryItem(item) [admin only], adjustInventory(itemId, type, amount, notes) [staff and admin, appends to AdjustmentLog], getAdjustmentLogs() [admin and staff], seedDemoInventory() [admin only, inserts realistic sample inventory items], seedDemoUsers() [admin only, inserts sample user records with various roles and statuses].",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Backend (Motoko) Data Models",
+          "Backend Functions"
+        ]
+      },
+      "acceptanceCriteria": [
+        "registerOrLogin() upserts the caller's user record and updates lastLoginAt; new users receive status #pending",
+        "getAllUsers(), updateUserRole(), deleteUser(), approveUser(), rejectUser(), addInventoryItem(), seedDemoInventory(), seedDemoUsers() return errors for non-admin callers",
+        "adjustInventory() and getAdjustmentLogs() return errors for guest or unapproved callers",
+        "updateUserRole() change is immediately visible in subsequent getAllUsers() calls without canister restart",
+        "adjustInventory() appends an AdjustmentLog entry with correct timestamp, caller principal, adjustmentType, amount, and newQuantity",
+        "seedDemoInventory() inserts at least 10 varied sample inventory items",
+        "seedDemoUsers() inserts at least 5 sample users with mixed roles and statuses"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Define a single CSS theme file (e.g., frontend/src/styles/theme.css) using CSS custom properties for all color tokens. Light mode tokens: white/light-gray backgrounds, dark text, indigo primary accent. Dark mode tokens: dark navy/dark-gray backgrounds, light text, same indigo primary accent. Tokens must cover: background-primary, background-secondary, text-primary, text-muted, text-disabled, border-color, accent-primary, accent-primary-hover, accent-foreground, destructive, success, warning. No token may resolve to a grayscale value in both modes simultaneously. Import this file globally so all components consume the same tokens via Tailwind CSS variable utilities or direct var() references.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "CSS variables/tokens defined in a single theme file and applied consistently across all components",
+          "CSS theme tokens must not resolve to grayscale in both modes"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A single theme CSS file exists and is imported at the app root",
+        "All color tokens are defined as CSS custom properties under :root (light) and [data-theme='dark'] or .dark selectors",
+        "Light mode and dark mode are visually distinct — backgrounds, text, and accents differ clearly",
+        "No token produces identical grayscale values in both modes",
+        "Switching theme immediately updates all themed surfaces without page reload"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement a persistent light/dark theme toggle in the header/nav bar. The chosen theme must be saved to localStorage and rehydrated on page load. The toggle should display a sun/moon icon. The theme class or data attribute must be applied to the document root so all CSS variable tokens take effect globally.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Theme toggle in the header/nav that persists selection"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Theme toggle button is visible in the header on all pages",
+        "Clicking the toggle switches between light and dark mode immediately",
+        "Selected theme persists across page reloads via localStorage",
+        "Sun icon shown in dark mode, moon icon shown in light mode (or equivalent clear icons)"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement Internet Identity authentication. On first login (registerOrLogin()), new users are placed in #pending status. The app must gate all authenticated routes: users with #pending or #rejected status see a 'waiting for approval' or 'access denied' screen instead of app content. Role-based access control must be enforced on the frontend: Guests see read-only views; Staff can adjust inventory; Admins have full access. Store the authenticated principal and user profile in React Query cache and re-fetch after login.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Internet Identity only",
+          "On first login, users are placed in a pending/approval state",
+          "Admins approve users and assign roles"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Unauthenticated users see only the Login page",
+        "After Internet Identity sign-in, registerOrLogin() is called and the user profile is fetched",
+        "Users with #pending status see a pending-approval message and cannot access app pages",
+        "Users with #rejected status see an access-denied message",
+        "Approved users are routed to the Dashboard",
+        "Role-based UI elements (Add Item button, Admin Panel link, adjust controls) are shown/hidden per role"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Build the Login page with: the DCS Tech brand name/logo text, a brief tagline, an Internet Identity sign-in button, and support for light and dark mode. The page must use the app's theme tokens for backgrounds and text. No navigation sidebar is shown on the login page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Login Page",
+          "Internet Identity sign-in button",
+          "Clean branding, light/dark mode support"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Login page renders the DCS Tech brand name prominently",
+        "Internet Identity sign-in button is centered and clearly labeled",
+        "Page respects light and dark theme tokens",
+        "No sidebar or nav menu is shown on the login page"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Build a responsive layout shell with: a fully opaque sidebar navigation on desktop (with links to Dashboard, Inventory, Reports, and Admin Panel for admins) and a hamburger menu drawer on mobile with the same fully opaque background. The header must contain the app title, the theme toggle, and a logged-in user indicator with sign-out option. Do not use backdropFilter blur or bg-opacity on the sidebar or mobile menu; use solid background colors from theme tokens.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Sidebar navigation on desktop, hamburger menu on mobile - both must have fully opaque backgrounds",
+          "Do not use backdropFilter blur or bg-opacity on cards, menus, or modals"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Desktop: sidebar is always visible with solid opaque background",
+        "Mobile: hamburger icon toggles a drawer with solid opaque background",
+        "Active route is highlighted in the sidebar/drawer",
+        "Admin Panel link only appears for admin users",
+        "Sign-out button signs out via Internet Identity and returns to Login page",
+        "No blur or opacity effects on sidebar/drawer backgrounds"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Build the Dashboard page with: four summary cards (Total Items, Low Stock Count, Total Users [admin only], Recent Activity Count); a Low Stock Alerts section where clicking the section header navigates to the Inventory page with the low-stock filter pre-applied, and each individual low-stock item is clickable and navigates to the Inventory page opening that item's detail view; and a Recent Activity log showing the latest adjustment log entries with timestamp, user email, item name, and action. Show loading skeletons during data fetch and empty-state messages when no data exists.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Dashboard",
+          "Summary cards",
+          "Low Stock Alerts section",
+          "Recent activity log"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Four summary cards display correct counts from backend data",
+        "Total Users card is only visible to admins",
+        "Clicking the Low Stock Alerts section header navigates to Inventory with low-stock filter active",
+        "Clicking an individual low-stock item opens its detail view on the Inventory page",
+        "Recent Activity log lists at least the 10 most recent adjustment log entries",
+        "Loading skeleton shown while data is fetching",
+        "Empty state message shown when no low-stock items or no activity exists"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Build the Inventory page with: a filterable table/grid of all inventory items with columns Name, SKU, Category, Quantity, Unit, Low-Stock Threshold, Status (In Stock / Low Stock badge); a stock-status filter control (All, Low Stock, In Stock); and a URL-driven or state-driven filter so the Dashboard can pre-apply the low-stock filter via navigation. Clicking any row opens the InventoryItemDetail overlay. Admin users see an 'Add Item' button that opens a form to create a new inventory item. Show loading and empty states.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Inventory Page",
+          "Filter by stock status (all, low stock, in stock)",
+          "Clicking an item opens an InventoryItemDetail overlay/card"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All inventory items returned by getInventoryItems() are displayed in the table",
+        "Stock-status filter correctly filters rows to All / Low Stock / In Stock",
+        "Pre-applied low-stock filter from Dashboard navigation activates correctly on page load",
+        "Clicking a row opens the InventoryItemDetail overlay for that item",
+        "Admin users see an Add Item button; non-admins do not",
+        "Add Item form calls addInventoryItem() and refreshes the list on success",
+        "Empty state shown when no items match the filter"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Build the InventoryItemDetail overlay/card. It must: have a fully opaque solid background color (set explicitly via className on the Shadcn Dialog's DialogContent, not inherited from a transparent parent and not using bg-opacity or backdropFilter); display all item fields (name, SKU, category, quantity, unit, low-stock threshold, description); show the item's adjustment history (from AdjustmentLog filtered by itemId) with columns timestamp, user email, type, amount, new quantity, notes; and for Staff and Admin users, show Add Stock and Remove Stock quantity input controls that call adjustInventory() and append to the log. Every adjustment must be logged with timestamp, user principal/email, and amount. Show a dark semi-transparent backdrop overlay behind the dialog. Toast notification on successful or failed adjustment.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "InventoryItemDetail: fully opaque background, all fields readable",
+          "Shadcn UI Dialog: apply opaque background via className overrides on DialogContent",
+          "every adjustment is logged with timestamp, user, and amount"
+        ]
+      },
+      "acceptanceCriteria": [
+        "InventoryItemDetail renders with an explicit solid background color via className on DialogContent",
+        "No bg-opacity, opacity, or backdropFilter applied to the dialog content",
+        "All item fields are visible and readable in both light and dark modes",
+        "Adjustment history table shows all logs for that item",
+        "Staff and Admin see Add Stock and Remove Stock controls with a quantity input",
+        "Submitting an adjustment calls adjustInventory() and refreshes the item and logs",
+        "Guest users see the detail view read-only with no adjustment controls",
+        "Toast shown on adjustment success or error",
+        "Dark semi-transparent backdrop is rendered behind the dialog"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Build the Admin Panel page (admin-only route). Include a User Management tab that lists all users with columns: Principal ID (truncated), Email, Created Date/Time, Last Login Date/Time, Role Badge, Status Badge. Each row includes: an inline role selector (dropdown for admin/staff/guest) that calls updateUserRole() on change and immediately invalidates and refetches the user list; Approve and Reject buttons for pending users that call approveUser()/rejectUser() and refresh the list; and a Delete button that opens a fully opaque confirmation dialog (via Shadcn Dialog with explicit opaque className override) before calling deleteUser(). Non-admin users must not be able to access this page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Admin Panel",
+          "User Management tab",
+          "Inline role selector",
+          "Delete user button with confirmation dialog before deletion; dialog is fully opaque and readable",
+          "Role updates must invalidate and refetch the user list immediately after saving"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin Panel route redirects non-admin users away",
+        "All users returned by getAllUsers() are listed with all required columns",
+        "Role selector changes persist: after selecting a new role, the list refetches and shows the updated role without page reload",
+        "Approve/Reject buttons appear only for pending users and update status on click",
+        "Delete button opens a fully opaque confirmation dialog before deletion",
+        "Confirmation dialog uses Shadcn Dialog with explicit opaque background via className, no blur or opacity",
+        "After deletion, user disappears from the list immediately",
+        "Toast shown for all success and error actions"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Build the Reports page accessible to Admin and Staff. Display a table of all AdjustmentLog entries with columns: Date/Time, Item Name, User (email), Adjustment Type (Add/Remove badge), Amount, New Quantity, Notes. Provide filter controls for date range (start date, end date) and item name (search/select). Filtering is applied client-side or via query parameters. Show loading and empty states.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Reports Page",
+          "Table of all inventory adjustment logs",
+          "Filterable by date range and item"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Reports page is accessible to admin and staff; guests are blocked or see read-only with no adjustment data if role allows",
+        "All adjustment logs from getAdjustmentLogs() are displayed",
+        "Date range filter correctly limits displayed rows",
+        "Item name filter correctly limits displayed rows",
+        "Add/Remove type is shown as a distinct colored badge",
+        "Empty state shown when no logs match the filter",
+        "Loading state shown during fetch"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Implement global toast/notification feedback using a toast system (e.g., Shadcn Toaster or react-hot-toast). Show success toasts for: inventory adjustments, role updates, user approval/rejection, user deletion, item creation, demo data seeding. Show error toasts for failed backend calls. Implement loading states (spinners or skeleton loaders) on all async data-fetching operations across Dashboard, Inventory, Admin Panel, and Reports pages.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Toast/notification feedback on success and error actions",
+          "Loading states on async operations"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Success toast appears after each successful mutation",
+        "Error toast appears when any backend call fails",
+        "Loading spinners or skeleton loaders shown during initial data fetch on each page",
+        "Toasts auto-dismiss after a reasonable timeout"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Add two Admin Panel buttons for demo data seeding: 'Seed Demo Inventory' (calls seedDemoInventory()) and 'Seed Demo Users' (calls seedDemoUsers()). Both buttons show a loading state while the call is in progress and display a success or error toast on completion. Place these buttons in a clearly labeled 'Demo Data' section within the Admin Panel.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "seedDemoInventory() - admin only",
+          "seedDemoUsers() - admin only"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Both seed buttons are visible only to admins in the Admin Panel",
+        "Clicking each button calls the corresponding backend function",
+        "Loading indicator shown during the async call",
+        "Success toast shown after seeding completes; error toast shown on failure",
+        "Inventory list and user list refresh after seeding"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not use backdropFilter blur, bg-opacity, or opacity on any card, modal, dialog, sidebar, or menu background — use explicit solid theme-token colors",
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Apply opaque backgrounds to Shadcn Dialog via className overrides on DialogContent only — do not modify Shadcn source files",
+    "All Motoko logic must reside in a single actor in backend/main.mo",
+    "CSS color tokens must not resolve to identical grayscale values in both light and dark modes"
+  ],
+  "nonGoals": [
+    "No external databases or cloud services — all data stored in Motoko stable variables",
+    "No email sending or SMS notifications",
+    "No real-time WebSocket updates — polling or manual refetch only",
+    "No social login providers other than Internet Identity",
+    "No mobile native app — web responsive only",
+    "No multi-canister or microservices architecture"
+  ],
+  "imageRequirements": {
+    "required": [
+      "DCS Tech logo mark — a minimal geometric tech icon in indigo and teal tones, suitable for a sidebar and login page header (dcs-tech-logo.dim_128x128.png)"
+    ],
+    "edits": []
+  }
+}

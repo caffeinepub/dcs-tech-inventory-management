@@ -1,0 +1,280 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T20:53:45.352Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 13,
+    "implemented": 11,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Implement the Motoko backend single actor with the following data models and all specified functions: User (principal, email: Text, role: #admin/#staff/#guest, status: #pending/#approved/#rejected, createdAt: Int, lastLoginAt: Int), InventoryItem (id: Nat, name, sku, category, quantity: Nat, unit, lowStockThreshold: Nat, description, createdAt: Int, updatedAt: Int), AdjustmentLog (id: Nat, itemId: Nat, itemName, adjustedBy: Principal, adjustedByEmail, adjustmentType: #add/#remove, amount: Nat, newQuantity: Nat, notes, timestamp: Int). Implement all backend functions: registerOrLogin(), getMyProfile(), getAllUsers() [admin only], updateUserRole(principal, role) [admin only, must persist reliably], deleteUser(principal) [admin only], approveUser(principal) [admin only], rejectUser(principal) [admin only], getInventoryItems() [all approved users], addInventoryItem(item) [admin only], adjustInventory(itemId, type, amount, notes) [staff and admin, appends to AdjustmentLog], getAdjustmentLogs() [admin and staff], seedDemoInventory() [admin only, inserts realistic sample inventory items], seedDemoUsers() [admin only, inserts sample user records with various roles and statuses].",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-10",
+        "summary": "Build the Admin Panel page (admin-only route). Include a User Management tab that lists all users with columns: Principal ID (truncated), Email, Created Date/Time, Last Login Date/Time, Role Badge, Status Badge. Each row includes: an inline role selector (dropdown for admin/staff/guest) that calls updateUserRole() on change and immediately invalidates and refetches the user list; Approve and Reject buttons for pending users that call approveUser()/rejectUser() and refresh the list; and a Delete button that opens a fully opaque confirmation dialog (via Shadcn Dialog with explicit opaque className override) before calling deleteUser(). Non-admin users must not be able to access this page.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Build the Reports page accessible to Admin and Staff. Display a table of all AdjustmentLog entries with columns: Date/Time, Item Name, User (email), Adjustment Type (Add/Remove badge), Amount, New Quantity, Notes. Provide filter controls for date range (start date, end date) and item name (search/select). Filtering is applied client-side or via query parameters. Show loading and empty states.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Reports.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Reports.tsx"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Implement global toast/notification feedback using a toast system (e.g., Shadcn Toaster or react-hot-toast). Show success toasts for: inventory adjustments, role updates, user approval/rejection, user deletion, item creation, demo data seeding. Show error toasts for failed backend calls. Implement loading states (spinners or skeleton loaders) on all async data-fetching operations across Dashboard, Inventory, Admin Panel, and Reports pages.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/hooks/useInventoryMutations.ts",
+          "frontend/src/hooks/useUserMutations.ts",
+          "frontend/src/hooks/useAdminMutations.ts"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-13",
+        "summary": "Add two Admin Panel buttons for demo data seeding: 'Seed Demo Inventory' (calls seedDemoInventory()) and 'Seed Demo Users' (calls seedDemoUsers()). Both buttons show a loading state while the call is in progress and display a success or error toast on completion. Place these buttons in a clearly labeled 'Demo Data' section within the Admin Panel.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminPanel.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Define a single CSS theme file (e.g., frontend/src/styles/theme.css) using CSS custom properties for all color tokens. Light mode tokens: white/light-gray backgrounds, dark text, indigo primary accent. Dark mode tokens: dark navy/dark-gray backgrounds, light text, same indigo primary accent. Tokens must cover: background-primary, background-secondary, text-primary, text-muted, text-disabled, border-color, accent-primary, accent-primary-hover, accent-foreground, destructive, success, warning. No token may resolve to a grayscale value in both modes simultaneously. Import this file globally so all components consume the same tokens via Tailwind CSS variable utilities or direct var() references.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/styles/theme.css",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Implement a persistent light/dark theme toggle in the header/nav bar. The chosen theme must be saved to localStorage and rehydrated on page load. The toggle should display a sun/moon icon. The theme class or data attribute must be applied to the document root so all CSS variable tokens take effect globally.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useTheme.ts",
+          "frontend/src/components/ThemeToggle.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useTheme.ts",
+          "frontend/src/components/ThemeToggle.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Implement Internet Identity authentication. On first login (registerOrLogin()), new users are placed in #pending status. The app must gate all authenticated routes: users with #pending or #rejected status see a 'waiting for approval' or 'access denied' screen instead of app content. Role-based access control must be enforced on the frontend: Guests see read-only views; Staff can adjust inventory; Admins have full access. Store the authenticated principal and user profile in React Query cache and re-fetch after login.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useAuth.ts",
+          "frontend/src/components/ProtectedRoute.tsx",
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Build the Login page with: the DCS Tech brand name/logo text, a brief tagline, an Internet Identity sign-in button, and support for light and dark mode. The page must use the app's theme tokens for backgrounds and text. No navigation sidebar is shown on the login page.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Login.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Login.tsx"
+        ]
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Build a responsive layout shell with: a fully opaque sidebar navigation on desktop (with links to Dashboard, Inventory, Reports, and Admin Panel for admins) and a hamburger menu drawer on mobile with the same fully opaque background. The header must contain the app title, the theme toggle, and a logged-in user indicator with sign-out option. Do not use backdropFilter blur or bg-opacity on the sidebar or mobile menu; use solid background colors from theme tokens.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Layout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Layout.tsx"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Build the Dashboard page with: four summary cards (Total Items, Low Stock Count, Total Users [admin only], Recent Activity Count); a Low Stock Alerts section where clicking the section header navigates to the Inventory page with the low-stock filter pre-applied, and each individual low-stock item is clickable and navigates to the Inventory page opening that item's detail view; and a Recent Activity log showing the latest adjustment log entries with timestamp, user email, item name, and action. Show loading skeletons during data fetch and empty-state messages when no data exists.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useInventoryItems.ts",
+          "frontend/src/hooks/useAdjustmentLogs.ts",
+          "frontend/src/hooks/useAllUsers.ts",
+          "frontend/src/pages/Dashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Dashboard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Build the Inventory page with: a filterable table/grid of all inventory items with columns Name, SKU, Category, Quantity, Unit, Low-Stock Threshold, Status (In Stock / Low Stock badge); a stock-status filter control (All, Low Stock, In Stock); and a URL-driven or state-driven filter so the Dashboard can pre-apply the low-stock filter via navigation. Clicking any row opens the InventoryItemDetail overlay. Admin users see an 'Add Item' button that opens a form to create a new inventory item. Show loading and empty states.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Inventory.tsx",
+          "frontend/src/components/AddItemModal.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Inventory.tsx",
+          "frontend/src/components/AddItemModal.tsx"
+        ]
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Build the InventoryItemDetail overlay/card. It must: have a fully opaque solid background color (set explicitly via className on the Shadcn Dialog's DialogContent, not inherited from a transparent parent and not using bg-opacity or backdropFilter); display all item fields (name, SKU, category, quantity, unit, low-stock threshold, description); show the item's adjustment history (from AdjustmentLog filtered by itemId) with columns timestamp, user email, type, amount, new quantity, notes; and for Staff and Admin users, show Add Stock and Remove Stock quantity input controls that call adjustInventory() and append to the log. Every adjustment must be logged with timestamp, user principal/email, and amount. Show a dark semi-transparent backdrop overlay behind the dialog. Toast notification on successful or failed adjustment.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/InventoryItemDetail.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/InventoryItemDetail.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/authorization/MixinAuthorization.mo",
+    "backend/authorization/access-control.mo",
+    "backend/main.mo",
+    "backend/user-approval/approval.mo",
+    "build-request.json",
+    "build-template/Dockerfile",
+    "build-template/LICENSE",
+    "build-template/README.md",
+    "build-template/deploy.sh",
+    "build-template/icp.yaml",
+    "build-template/package.json",
+    "build-template/pnpm-lock.yaml",
+    "build-template/pnpm-workspace.yaml",
+    "build-template/scripts/prune-unused-images.js",
+    "build-template/scripts/resize-images.js",
+    "build-template/src/backend/canister.yaml",
+    "build-template/src/backend/system-idl/aaaaa-aa.did",
+    "build-template/src/frontend/canister.yaml",
+    "build-template/src/frontend/components.json",
+    "build-template/src/frontend/env.json",
+    "build-template/src/frontend/eslint-rules/no-bigint-in-query-keys.js",
+    "build-template/src/frontend/eslint-rules/require-internet-identity-provider.js",
+    "build-template/src/frontend/eslint.config.js",
+    "build-template/src/frontend/package.json",
+    "build-template/src/frontend/postcss.config.js",
+    "build-template/src/frontend/src/components/ui/accordion.tsx",
+    "build-template/src/frontend/src/components/ui/alert-dialog.tsx",
+    "build-template/src/frontend/src/components/ui/alert.tsx",
+    "build-template/src/frontend/src/components/ui/aspect-ratio.tsx",
+    "build-template/src/frontend/src/components/ui/avatar.tsx",
+    "build-template/src/frontend/src/components/ui/badge.tsx",
+    "build-template/src/frontend/src/components/ui/breadcrumb.tsx",
+    "build-template/src/frontend/src/components/ui/button.tsx",
+    "build-template/src/frontend/src/components/ui/calendar.tsx",
+    "build-template/src/frontend/src/components/ui/card.tsx",
+    "build-template/src/frontend/src/components/ui/carousel.tsx",
+    "build-template/src/frontend/src/components/ui/chart.tsx",
+    "build-template/src/frontend/src/components/ui/checkbox.tsx",
+    "build-template/src/frontend/src/components/ui/collapsible.tsx",
+    "build-template/src/frontend/src/components/ui/command.tsx",
+    "build-template/src/frontend/src/components/ui/context-menu.tsx",
+    "build-template/src/frontend/src/components/ui/dialog.tsx",
+    "build-template/src/frontend/src/components/ui/drawer.tsx",
+    "build-template/src/frontend/src/components/ui/dropdown-menu.tsx",
+    "build-template/src/frontend/src/components/ui/form.tsx",
+    "build-template/src/frontend/src/components/ui/hover-card.tsx",
+    "build-template/src/frontend/src/components/ui/input-otp.tsx",
+    "build-template/src/frontend/src/components/ui/input.tsx",
+    "build-template/src/frontend/src/components/ui/label.tsx",
+    "build-template/src/frontend/src/components/ui/menubar.tsx",
+    "build-template/src/frontend/src/components/ui/navigation-menu.tsx",
+    "build-template/src/frontend/src/components/ui/pagination.tsx",
+    "build-template/src/frontend/src/components/ui/popover.tsx",
+    "build-template/src/frontend/src/components/ui/progress.tsx",
+    "build-template/src/frontend/src/components/ui/radio-group.tsx",
+    "build-template/src/frontend/src/components/ui/resizable.tsx",
+    "build-template/src/frontend/src/components/ui/scroll-area.tsx",
+    "build-template/src/frontend/src/components/ui/select.tsx",
+    "build-template/src/frontend/src/components/ui/separator.tsx",
+    "build-template/src/frontend/src/components/ui/sheet.tsx",
+    "build-template/src/frontend/src/components/ui/sidebar.tsx",
+    "build-template/src/frontend/src/components/ui/skeleton.tsx",
+    "build-template/src/frontend/src/components/ui/slider.tsx",
+    "build-template/src/frontend/src/components/ui/sonner.tsx",
+    "build-template/src/frontend/src/components/ui/switch.tsx",
+    "build-template/src/frontend/src/components/ui/table.tsx",
+    "build-template/src/frontend/src/components/ui/tabs.tsx",
+    "build-template/src/frontend/src/components/ui/textarea.tsx",
+    "build-template/src/frontend/src/components/ui/toggle-group.tsx",
+    "build-template/src/frontend/src/components/ui/toggle.tsx",
+    "build-template/src/frontend/src/components/ui/tooltip.tsx",
+    "build-template/src/frontend/src/hooks/use-mobile.tsx",
+    "build-template/src/frontend/src/lib/utils.ts",
+    "build-template/src/frontend/tsconfig.json",
+    "build-template/src/frontend/vite.config.js",
+    "build-template/tsconfig.json",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-implementation-plan.json",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/public/assets/generated/dcs-tech-logo.dim_128x128.png",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AddItemModal.tsx",
+    "frontend/src/components/InventoryItemDetail.tsx",
+    "frontend/src/components/Layout.tsx",
+    "frontend/src/components/ProfileSetupModal.tsx",
+    "frontend/src/components/ThemeToggle.tsx",
+    "frontend/src/config.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useTheme.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/AdminPanel.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/pages/Inventory.tsx",
+    "frontend/src/pages/Login.tsx",
+    "frontend/src/pages/Reports.tsx",
+    "frontend/src/ui-summary.json",
+    "frontend/src/utils/StorageClient.ts",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}
