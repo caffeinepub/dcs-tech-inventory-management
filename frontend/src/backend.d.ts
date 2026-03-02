@@ -27,6 +27,23 @@ export interface UserApprovalInfo {
     status: ApprovalStatus;
     principal: Principal;
 }
+export interface BulkInventoryRecord {
+    partNumber: bigint;
+    partName: string;
+    description: string;
+    stockThreshold: bigint;
+    quantity: bigint;
+    category: string;
+    location: string;
+}
+export interface BulkImportResult {
+    skippedRows: Array<BulkImportError>;
+    newRecords: Array<BulkInventoryRecord>;
+    newRecordCount: bigint;
+    updatedCount: bigint;
+    createdCount: bigint;
+    skippedCount: bigint;
+}
 export interface AdjustmentLog {
     id: bigint;
     itemId: bigint;
@@ -47,6 +64,11 @@ export interface UserProfile {
     createdAt: bigint;
     role: AppRole;
     email: string;
+}
+export interface BulkImportError {
+    rowIndex: bigint;
+    reason: string;
+    record: BulkInventoryRecord;
 }
 export enum AppRole {
     admin = "admin",
@@ -72,6 +94,7 @@ export interface backendInterface {
     adjustInventory(itemId: bigint, adjustmentType: Variant_add_remove, amount: bigint, notes: string): Promise<void>;
     approveUser(user: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    bulkImportInventory(records: Array<BulkInventoryRecord>): Promise<BulkImportResult>;
     deleteUser(user: Principal): Promise<void>;
     getAdjustmentLogs(): Promise<Array<AdjustmentLog>>;
     getAllUsers(): Promise<Array<UserProfile>>;

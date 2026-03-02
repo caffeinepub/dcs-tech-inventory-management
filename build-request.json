@@ -1,39 +1,64 @@
 {
   "kind": "build_request",
-  "title": "Auto-promote first registered user to admin",
+  "title": "CSV Bulk Import for Inventory on Admin Page",
   "projectName": "DCS Tech Inventory",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-14",
-      "text": "In the backend registerOrLogin() function, check whether any users exist in the system before creating a new user record. If no users exist (i.e., the caller is the very first user to register), automatically assign them the #admin role and #approved status instead of the default #pending status and #guest role. This bypasses the approval workflow exclusively for the bootstrap case.",
+      "id": "REQ-1",
+      "text": "Add a backend function `bulkImportInventory` that accepts an array of inventory item records (partNumber, partName, description, quantity, stockThreshold, category, location). For each record: if the partNumber already exists, update the existing item with the new data; if it does not exist, create a new item. Return a result summary containing counts of items created, updated, and skipped, plus an array of skipped row indices with reasons.",
       "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-recent-1"
         ],
         "quotes": [
-          "i need to make sure that the very first user who logs into this platform once live, will be set as the main admin",
-          "the first user requires approval but there is no way to approve it since there are no active users"
+          "for duplicates, update the existing item with the new data from the csv being imported",
+          "for validation skip the bad and continue the import"
         ]
       },
       "acceptanceCriteria": [
-        "When registerOrLogin() is called and the user store is empty (zero existing users), the new user is created with role = #admin and status = #approved.",
-        "When registerOrLogin() is called and at least one user already exists, the new user is created with role = #guest and status = #pending as before.",
-        "The first registered user can immediately access admin-only routes and functions (e.g., getAllUsers, updateUserRole, approveUser) without any separate approval step.",
-        "Subsequent users still go through the normal pending approval workflow and cannot access admin features until approved by an admin.",
-        "No existing approved user's role or status is altered by this change."
+        "Calling bulkImportInventory with rows where some partNumbers already exist causes those items to be updated with new field values.",
+        "Calling bulkImportInventory with rows containing new partNumbers creates those items.",
+        "Rows with missing required fields (partNumber, partName, quantity) or non-numeric quantity/stockThreshold are skipped without stopping the import.",
+        "The function returns a summary object with createdCount, updatedCount, skippedCount, and a list of skipped row details."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add a CSV Import section to the AdminPanel page that allows an admin to upload a CSV file with the headers: partNumber, partName, description, quantity, stockThreshold, category, location. Parse the CSV client-side, validate each row (required fields present, quantity and stockThreshold are numeric), skip invalid rows, and call the backend `bulkImportInventory` function with the valid rows. Display a results summary after import showing how many items were created, updated, and skipped, along with details of skipped rows and their reasons.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent-1"
+        ],
+        "quotes": [
+          "add an import feature in the admin page so that a csv file can be uploaded to update the inventory data",
+          "for duplicates, update the existing item with the new data from the csv being imported",
+          "for validation skip the bad and continue the import"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A file input (accepting .csv) and an Import button are visible on the AdminPanel page for admin users only.",
+        "Uploading a valid CSV with correct headers parses all rows and submits them to the backend.",
+        "Rows missing required fields or with non-numeric quantity/stockThreshold are skipped client-side before submission.",
+        "After import completes, a summary is displayed showing created count, updated count, skipped count, and per-skipped-row details.",
+        "The import does not stop when a bad row is encountered; remaining valid rows continue to be processed.",
+        "A loading/progress indicator is shown while the import is in progress.",
+        "An error message is shown if the uploaded file is not a valid CSV or has incorrect headers."
       ]
     }
   ],
   "constraints": [
-    "Do not alter the approval workflow for any user registration that occurs when at least one user already exists.",
-    "The bootstrap promotion logic must live entirely in the backend registerOrLogin() function — no frontend workarounds."
+    "CSV headers must match exactly: partNumber, partName, description, quantity, stockThreshold, category, location.",
+    "Only admin-role users can access the CSV import feature.",
+    "Do not modify any files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui."
   ],
   "nonGoals": [
-    "Adding a separate admin-seeding CLI or script.",
-    "Changing the role or status of any already-registered user.",
-    "Modifying the frontend authentication or routing logic."
+    "Importing other data types (users, logs) via CSV.",
+    "Server-side CSV file storage or persistence of import history.",
+    "Undo/rollback of a completed import.",
+    "Real-time progress updates during import."
   ],
   "imageRequirements": {
     "required": [],

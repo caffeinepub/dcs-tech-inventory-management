@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import { AppRole, Variant_add_remove, type UserProfile, type InventoryItem, type AdjustmentLog } from '../backend';
+import { AppRole, Variant_add_remove, type UserProfile, type InventoryItem, type AdjustmentLog, type BulkInventoryRecord, type BulkImportResult } from '../backend';
 import { toast } from 'sonner';
 import { Principal } from '@dfinity/principal';
 
@@ -271,6 +271,32 @@ export function useSeedDemoUsers() {
     },
     onError: (error: Error) => {
       toast.error(`Failed to seed users: ${error.message}`);
+    },
+  });
+}
+
+// ─── Bulk Import ───────────────────────────────────────────────────────────
+
+export function useBulkImportInventory() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation<BulkImportResult, Error, BulkInventoryRecord[]>({
+    mutationFn: async (records: BulkInventoryRecord[]) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.bulkImportInventory(records);
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['inventoryItems'] });
+      const created = Number(result.createdCount);
+      const updated = Number(result.updatedCount);
+      const skipped = Number(result.skippedCount);
+      toast.success(
+        `Import complete: ${created} created, ${updated} updated${skipped > 0 ? `, ${skipped} skipped` : ''}`
+      );
+    },
+    onError: (error: Error) => {
+      toast.error(`Import failed: ${error.message}`);
     },
   });
 }

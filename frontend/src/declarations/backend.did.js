@@ -13,6 +13,28 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const BulkInventoryRecord = IDL.Record({
+  'partNumber' : IDL.Nat,
+  'partName' : IDL.Text,
+  'description' : IDL.Text,
+  'stockThreshold' : IDL.Nat,
+  'quantity' : IDL.Nat,
+  'category' : IDL.Text,
+  'location' : IDL.Text,
+});
+export const BulkImportError = IDL.Record({
+  'rowIndex' : IDL.Nat,
+  'reason' : IDL.Text,
+  'record' : BulkInventoryRecord,
+});
+export const BulkImportResult = IDL.Record({
+  'skippedRows' : IDL.Vec(BulkImportError),
+  'newRecords' : IDL.Vec(BulkInventoryRecord),
+  'newRecordCount' : IDL.Nat,
+  'updatedCount' : IDL.Nat,
+  'createdCount' : IDL.Nat,
+  'skippedCount' : IDL.Nat,
+});
 export const AdjustmentLog = IDL.Record({
   'id' : IDL.Nat,
   'itemId' : IDL.Nat,
@@ -101,6 +123,11 @@ export const idlService = IDL.Service({
     ),
   'approveUser' : IDL.Func([IDL.Principal], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'bulkImportInventory' : IDL.Func(
+      [IDL.Vec(BulkInventoryRecord)],
+      [BulkImportResult],
+      [],
+    ),
   'deleteUser' : IDL.Func([IDL.Principal], [], []),
   'getAdjustmentLogs' : IDL.Func([], [IDL.Vec(AdjustmentLog)], ['query']),
   'getAllUsers' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
@@ -139,6 +166,28 @@ export const idlFactory = ({ IDL }) => {
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
+  });
+  const BulkInventoryRecord = IDL.Record({
+    'partNumber' : IDL.Nat,
+    'partName' : IDL.Text,
+    'description' : IDL.Text,
+    'stockThreshold' : IDL.Nat,
+    'quantity' : IDL.Nat,
+    'category' : IDL.Text,
+    'location' : IDL.Text,
+  });
+  const BulkImportError = IDL.Record({
+    'rowIndex' : IDL.Nat,
+    'reason' : IDL.Text,
+    'record' : BulkInventoryRecord,
+  });
+  const BulkImportResult = IDL.Record({
+    'skippedRows' : IDL.Vec(BulkImportError),
+    'newRecords' : IDL.Vec(BulkInventoryRecord),
+    'newRecordCount' : IDL.Nat,
+    'updatedCount' : IDL.Nat,
+    'createdCount' : IDL.Nat,
+    'skippedCount' : IDL.Nat,
   });
   const AdjustmentLog = IDL.Record({
     'id' : IDL.Nat,
@@ -228,6 +277,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'approveUser' : IDL.Func([IDL.Principal], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'bulkImportInventory' : IDL.Func(
+        [IDL.Vec(BulkInventoryRecord)],
+        [BulkImportResult],
+        [],
+      ),
     'deleteUser' : IDL.Func([IDL.Principal], [], []),
     'getAdjustmentLogs' : IDL.Func([], [IDL.Vec(AdjustmentLog)], ['query']),
     'getAllUsers' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),

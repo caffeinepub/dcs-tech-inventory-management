@@ -29,6 +29,28 @@ export type AppRole = { 'admin' : null } |
 export type ApprovalStatus = { 'pending' : null } |
   { 'approved' : null } |
   { 'rejected' : null };
+export interface BulkImportError {
+  'rowIndex' : bigint,
+  'reason' : string,
+  'record' : BulkInventoryRecord,
+}
+export interface BulkImportResult {
+  'skippedRows' : Array<BulkImportError>,
+  'newRecords' : Array<BulkInventoryRecord>,
+  'newRecordCount' : bigint,
+  'updatedCount' : bigint,
+  'createdCount' : bigint,
+  'skippedCount' : bigint,
+}
+export interface BulkInventoryRecord {
+  'partNumber' : bigint,
+  'partName' : string,
+  'description' : string,
+  'stockThreshold' : bigint,
+  'quantity' : bigint,
+  'category' : string,
+  'location' : string,
+}
 export interface InventoryItem {
   'id' : bigint,
   'sku' : string,
@@ -88,6 +110,10 @@ export interface _SERVICE {
   >,
   'approveUser' : ActorMethod<[Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'bulkImportInventory' : ActorMethod<
+    [Array<BulkInventoryRecord>],
+    BulkImportResult
+  >,
   'deleteUser' : ActorMethod<[Principal], undefined>,
   'getAdjustmentLogs' : ActorMethod<[], Array<AdjustmentLog>>,
   'getAllUsers' : ActorMethod<[], Array<UserProfile>>,

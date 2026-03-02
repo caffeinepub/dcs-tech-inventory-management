@@ -109,6 +109,23 @@ export interface UserApprovalInfo {
     status: ApprovalStatus;
     principal: Principal;
 }
+export interface BulkInventoryRecord {
+    partNumber: bigint;
+    partName: string;
+    description: string;
+    stockThreshold: bigint;
+    quantity: bigint;
+    category: string;
+    location: string;
+}
+export interface BulkImportResult {
+    skippedRows: Array<BulkImportError>;
+    newRecords: Array<BulkInventoryRecord>;
+    newRecordCount: bigint;
+    updatedCount: bigint;
+    createdCount: bigint;
+    skippedCount: bigint;
+}
 export interface AdjustmentLog {
     id: bigint;
     itemId: bigint;
@@ -129,6 +146,11 @@ export interface UserProfile {
     createdAt: bigint;
     role: AppRole;
     email: string;
+}
+export interface BulkImportError {
+    rowIndex: bigint;
+    reason: string;
+    record: BulkInventoryRecord;
 }
 export enum AppRole {
     admin = "admin",
@@ -155,6 +177,7 @@ export interface backendInterface {
     adjustInventory(itemId: bigint, adjustmentType: Variant_add_remove, amount: bigint, notes: string): Promise<void>;
     approveUser(user: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    bulkImportInventory(records: Array<BulkInventoryRecord>): Promise<BulkImportResult>;
     deleteUser(user: Principal): Promise<void>;
     getAdjustmentLogs(): Promise<Array<AdjustmentLog>>;
     getAllUsers(): Promise<Array<UserProfile>>;
@@ -247,6 +270,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n3(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async bulkImportInventory(arg0: Array<BulkInventoryRecord>): Promise<BulkImportResult> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.bulkImportInventory(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.bulkImportInventory(arg0);
             return result;
         }
     }

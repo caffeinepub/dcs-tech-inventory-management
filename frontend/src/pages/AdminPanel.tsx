@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Shield, Users, Database, Trash2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Shield, Users, Database, Trash2, CheckCircle, XCircle, Loader2, Package, FileUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,6 +42,7 @@ import {
 } from '../hooks/useQueries';
 import { AppRole, type UserProfile } from '../backend';
 import { Principal } from '@dfinity/principal';
+import CsvImportSection from '../components/CsvImportSection';
 
 function formatTimestamp(ts: bigint): string {
   const ms = Number(ts) / 1_000_000;
@@ -155,6 +156,10 @@ function AdminPanelContent() {
           <TabsTrigger value="users" className="gap-2">
             <Users className="h-4 w-4" />
             User Management
+          </TabsTrigger>
+          <TabsTrigger value="import" className="gap-2">
+            <FileUp className="h-4 w-4" />
+            CSV Import
           </TabsTrigger>
           <TabsTrigger value="demo" className="gap-2">
             <Database className="h-4 w-4" />
@@ -288,6 +293,25 @@ function AdminPanelContent() {
           </div>
         </TabsContent>
 
+        {/* CSV Import Tab */}
+        <TabsContent value="import" className="mt-4">
+          <Card className="bg-card border-border shadow-card">
+            <CardHeader>
+              <CardTitle className="text-base font-display font-semibold flex items-center gap-2">
+                <FileUp className="h-4 w-4 text-primary" />
+                Bulk Inventory Import
+              </CardTitle>
+              <CardDescription className="text-muted-foreground text-sm">
+                Upload a CSV file to create new inventory items or update existing ones by part number.
+                Duplicate part numbers will be updated with the new data; invalid rows will be skipped.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CsvImportSection />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Demo Data Tab */}
         <TabsContent value="demo" className="mt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -405,6 +429,3 @@ function AdminPanelContent() {
     </div>
   );
 }
-
-// Need to import Package for the demo data tab
-import { Package } from 'lucide-react';

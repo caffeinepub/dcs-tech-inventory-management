@@ -1,0 +1,5 @@
+{
+  "frontend/src/hooks/useQueries.ts": "All React Query hooks for backend interactions including profile, inventory, adjustment logs, users, admin seed operations, and the new `useBulkImportInventory` mutation that calls `actor.bulkImportInventory`, invalidates the inventory query on success, and returns the `BulkImportResult`.",
+  "frontend/src/components/CsvImportSection.tsx": "Self-contained CSV import component with a drag-and-drop file input, client-side CSV parsing and validation (required fields, numeric checks), a template download button, a parse preview showing valid/skipped row counts with per-row skip reasons, an import action button with loading state, and a post-import results summary showing created/updated/skipped counts.",
+  "frontend/src/pages/AdminPanel.tsx": "Admin panel page with three tabs — User Management (user table with role/status controls), CSV Import (renders `CsvImportSection` inside a Card, admin-only), and Demo Data (seed buttons for inventory and users) — plus a delete confirmation dialog."
+}

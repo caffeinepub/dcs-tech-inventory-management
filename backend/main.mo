@@ -13,9 +13,7 @@ import Runtime "mo:core/Runtime";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import UserApproval "user-approval/approval";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   let approvalState = UserApproval.initState(accessControlState);
@@ -71,6 +69,31 @@ actor {
     newQuantity : Nat;
     notes : Text;
     timestamp : Int;
+  };
+
+  type BulkInventoryRecord = {
+    partNumber : Nat;
+    partName : Text;
+    description : Text;
+    quantity : Nat;
+    stockThreshold : Nat;
+    category : Text;
+    location : Text;
+  };
+
+  type BulkImportError = {
+    rowIndex : Nat;
+    reason : Text;
+    record : BulkInventoryRecord;
+  };
+
+  type BulkImportResult = {
+    createdCount : Nat;
+    updatedCount : Nat;
+    skippedCount : Nat;
+    skippedRows : [BulkImportError];
+    newRecordCount : Nat;
+    newRecords : [BulkInventoryRecord];
   };
 
   let userMap = Map.empty<Principal, UserProfile>();
@@ -398,6 +421,73 @@ actor {
       Runtime.trap("Unauthorized: Only approved users can view adjustment logs");
     };
     adjustmentList.toArray();
+  };
+
+  public shared ({ caller }) func bulkImportInventory(records : [BulkInventoryRecord]) : async BulkImportResult {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can bulk import inventory");
+    };
+
+    let skippedRows = List.empty<BulkImportError>();
+    var createdCount = 0;
+    var updatedCount = 0;
+    var skippedCount = 0;
+
+    for (record in records.values()) {
+      switch (inventoryMap.get(record.partNumber)) {
+        case (?_existing) {
+          let item : InventoryItem = {
+            id = record.partNumber;
+            name = record.partName;
+            sku = "";
+            category = record.category;
+            quantity = record.quantity;
+            unit = "";
+            lowStockThreshold = record.stockThreshold;
+            description = record.description;
+            createdAt = Time.now();
+            updatedAt = Time.now();
+            price = 0.0;
+            supplier = "";
+            expirationDate = null;
+            barcode = "";
+          };
+          inventoryMap.add(record.partNumber, item);
+          updatedCount += 1;
+        };
+        case (null) {
+          let item : InventoryItem = {
+            id = record.partNumber;
+            name = record.partName;
+            sku = "";
+            category = record.category;
+            quantity = record.quantity;
+            unit = "";
+            lowStockThreshold = record.stockThreshold;
+            description = record.description;
+            createdAt = Time.now();
+            updatedAt = Time.now();
+            price = 0.0;
+            supplier = "";
+            expirationDate = null;
+            barcode = "";
+          };
+          inventoryMap.add(record.partNumber, item);
+          createdCount += 1;
+        };
+      };
+    };
+
+    let result : BulkImportResult = {
+      createdCount;
+      updatedCount;
+      skippedCount;
+      skippedRows = skippedRows.toArray();
+      newRecordCount = createdCount + updatedCount;
+      newRecords = [];
+    };
+
+    result;
   };
 
   public shared ({ caller }) func seedDemoInventory() : async () {

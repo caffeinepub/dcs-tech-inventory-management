@@ -1,6 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Auto-promote first registered user to admin",
-  "requirements": []
+  "title": "CSV Bulk Import for Inventory on Admin Page",
+  "requirements": [
+    {
+      "id": "REQ-2",
+      "summary": "Add CSV Import section to AdminPanel page for bulk inventory import with validation, error handling, and results summary",
+      "acceptanceCriteria": [
+        "A file input (accepting .csv) and an Import button are visible on the AdminPanel page for admin users only.",
+        "Uploading a valid CSV with correct headers parses all rows and submits them to the backend.",
+        "Rows missing required fields or with non-numeric quantity/stockThreshold are skipped client-side before submission.",
+        "After import completes, a summary is displayed showing created count, updated count, skipped count, and per-skipped-row details.",
+        "The import does not stop when a bad row is encountered; remaining valid rows continue to be processed.",
+        "A loading/progress indicator is shown while the import is in progress.",
+        "An error message is shown if the uploaded file is not a valid CSV or has incorrect headers."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CsvImportSection.tsx",
+          "operation": "create",
+          "description": "Create a reusable CSV import component that renders a file input (accepting .csv), parses the uploaded CSV client-side using Papa Parse or similar library, validates each row (ensuring partNumber, partName, and quantity are present; quantity and stockThreshold are numeric), collects valid and invalid rows separately, displays validation errors for skipped rows, calls the backend bulkImportInventory mutation with valid records via the useBulkImportInventory hook, and displays a comprehensive results summary showing created, updated, and skipped counts along with details of skipped rows and their reasons. Include a loading spinner during import and error messages for invalid file formats or incorrect CSV headers (partNumber, partName, description, quantity, stockThreshold, category, location)."
+        },
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Import and render the CsvImportSection component within the AdminPanel page, placing it in a dedicated Card section below the existing user management table. Ensure the CSV import section is only visible to admin users by leveraging the existing role-based rendering logic already present in this page."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new mutation hook useBulkImportInventory that calls actor.bulkImportInventory with an array of BulkInventoryRecord objects. On success, invalidate the 'inventoryItems' query key to refresh the inventory list. Return the BulkImportResult containing createdCount, updatedCount, skippedCount, and skippedRows array with row indices and reasons."
+        }
+      ]
+    }
+  ]
 }
