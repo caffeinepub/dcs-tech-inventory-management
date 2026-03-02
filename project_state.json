@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "DCS Tech Inventory Management Application — a multi-role inventory management web app on Internet Computer. Features user authentication via Internet Identity with admin approval workflow, admin/staff/guest roles, inventory tracking with low-stock alerts, adjustment logging, reporting, and an admin panel for user management. Built with Motoko backend, React/TypeScript/Vite/Tailwind/React Query frontend, and Shadcn UI components.",
   "architectural_notes": [
     "Tech stack: Motoko (Internet Computer backend), React + TypeScript + Vite + Tailwind CSS + React Query (frontend), Internet Identity (auth), Shadcn UI with className overrides",
@@ -8,11 +8,13 @@
     "Shadcn UI Dialog: apply opaque background via className overrides on DialogContent only, never edit shadcn source files",
     "CSS theme tokens must not resolve to grayscale in either light or dark mode",
     "Role updates must invalidate and refetch user list immediately after saving",
-    "InventoryItemDetail must set an explicit solid background color, not inherit from transparent parent"
+    "InventoryItemDetail must set an explicit solid background color, not inherit from transparent parent",
+    "First registered user (when user store is empty) must be auto-approved as admin — no pending state for the bootstrap admin"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- DCS Tech logo mark — a minimal geometric tech icon in indigo and teal tones, suitable for a sidebar and login page header (dcs-tech-logo.dim_128x128.png)",
+  "known_issues": [
+    "Bootstrap problem: first user on a live deployment gets stuck in pending with no way to approve since no admins exist yet"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-define-a-single-css-theme-file-e-g-frontend-src-styles-theme-css-using-css-custom-properties-for-all-color-tokens-light-mode-tokens-white-light-gray-backgrounds-dark-text-indigo-primary-accent-dark-mode-tokens-dark-navy-dark-gray-backgrounds-light-text-same-indigo-primary-accent-tokens-must-cover-background-primary-background-secondary-text-primary-text-muted-text-disabled-border-color-accent-primary-accent-primary-hover-accent-foreground-destructive-success-warning-no-token-may-resolve-to-a-grayscale-value-in-both-modes-simultaneously-import-this-file-globally-so-all-components-consume-the-same-tokens-via-tailwind-css-variable-utilities-or-direct-var-references",
@@ -177,6 +179,20 @@
       "summary": "Implement global toast/notification feedback using a toast system (e.g., Shadcn Toaster or react-hot-toast). Show success toasts for: inventory adjustments, role updates, user approval/rejection, user deletion, item creation, demo data seeding. Show error toasts for failed backend calls. Implement loading states (spinners or skeleton loaders) on all async data-fetching operations across Dashboard, Inventory, Admin Panel, and Reports pages.",
       "reqIds": [
         "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "First user to register (when no users exist) is automatically set as admin with approved status, bypassing the pending approval workflow",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "In the backend registerOrLogin() function, check whether any users exist in the system before creating a new user record. If no users exist (i.e., the caller is the very first user to register), automatically assign them the #admin role and #approved status instead of the default #pending status and #guest role. This bypasses the approval workflow exclusively for the bootstrap case.",
+      "reqIds": [
+        "REQ-14"
       ],
       "status": "pending"
     }

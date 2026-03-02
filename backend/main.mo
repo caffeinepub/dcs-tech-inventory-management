@@ -13,7 +13,9 @@ import Runtime "mo:core/Runtime";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 import UserApproval "user-approval/approval";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   let approvalState = UserApproval.initState(accessControlState);
@@ -104,30 +106,8 @@ actor {
     AccessControl.hasPermission(accessControlState, p, #user);
   };
 
-  func compareFloats(a : Float, b : Float) : Order.Order {
-    let epsilon : Float = 0.000001;
-    let diff = a - b;
-    if (diff > epsilon) { #greater } else if (diff < -epsilon) { #less } else { #equal };
-  };
-
   func compareByCreatedAt(i1 : InventoryItem, i2 : InventoryItem) : Order.Order {
     Int.compare(i1.createdAt, i2.createdAt);
-  };
-
-  func userStatusToApprovalStatus(s : UserStatus) : UserApproval.ApprovalStatus {
-    switch s {
-      case (#approved) { #approved };
-      case (#rejected) { #rejected };
-      case (#pending) { #pending };
-    };
-  };
-
-  func approvalStatusToUserStatus(a : UserApproval.ApprovalStatus) : UserStatus {
-    switch a {
-      case (#approved) { #approved };
-      case (#rejected) { #rejected };
-      case (#pending) { #pending };
-    };
   };
 
   public query ({ caller }) func isCallerApproved() : async Bool {
@@ -161,6 +141,21 @@ actor {
         updated;
       };
       case (null) {
+        if (userMap.size() == 0) {
+          let systemAdmin : UserProfile = {
+            principal = caller;
+            email = "";
+            name = "";
+            role = #admin;
+            status = #approved;
+            createdAt = now;
+            lastLoginAt = now;
+          };
+          userMap.add(caller, systemAdmin);
+          AccessControl.assignRole(accessControlState, caller, caller, #admin);
+          return systemAdmin;
+        };
+
         let newUser : UserProfile = {
           principal = caller;
           email = "";
@@ -171,7 +166,6 @@ actor {
           lastLoginAt = now;
         };
         userMap.add(caller, newUser);
-        AccessControl.assignRole(accessControlState, caller, caller, #guest);
         newUser;
       };
     };
