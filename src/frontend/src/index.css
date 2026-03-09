@@ -1,0 +1,167 @@
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque-Variable.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.625rem;
+
+    /* Light mode — blue-tinted slate backgrounds, deep indigo text, vibrant indigo primary */
+    --background: 0.955 0.018 258;
+    --foreground: 0.18 0.055 262;
+    --card: 0.99 0.006 255;
+    --card-foreground: 0.18 0.055 262;
+    --popover: 0.99 0.006 255;
+    --popover-foreground: 0.18 0.055 262;
+
+    /* Vibrant indigo primary */
+    --primary: 0.46 0.26 264;
+    --primary-foreground: 0.99 0 0;
+
+    /* Cool slate-blue secondary */
+    --secondary: 0.88 0.055 258;
+    --secondary-foreground: 0.28 0.09 262;
+
+    /* Slightly tinted muted */
+    --muted: 0.91 0.03 257;
+    --muted-foreground: 0.44 0.07 260;
+
+    /* Teal accent */
+    --accent: 0.88 0.07 200;
+    --accent-foreground: 0.2 0.1 200;
+
+    --destructive: 0.52 0.26 27;
+    --destructive-foreground: 0.99 0 0;
+
+    --border: 0.83 0.04 258;
+    --input: 0.86 0.035 258;
+    --ring: 0.46 0.26 264;
+
+    /* Vivid semantic colors */
+    --success: 0.5 0.2 150;
+    --success-foreground: 0.99 0 0;
+    --warning: 0.64 0.22 68;
+    --warning-foreground: 0.15 0.06 68;
+    --info: 0.52 0.22 220;
+    --info-foreground: 0.99 0 0;
+
+    --chart-1: 0.46 0.26 264;
+    --chart-2: 0.5 0.2 150;
+    --chart-3: 0.52 0.22 220;
+    --chart-4: 0.64 0.22 68;
+    --chart-5: 0.52 0.26 27;
+
+    /* Sidebar — deep indigo-navy panel */
+    --sidebar: 0.24 0.08 264;
+    --sidebar-foreground: 0.96 0.012 250;
+    --sidebar-primary: 0.6 0.22 264;
+    --sidebar-primary-foreground: 0.99 0 0;
+    --sidebar-accent: 0.33 0.1 264;
+    --sidebar-accent-foreground: 0.96 0.012 250;
+    --sidebar-border: 0.33 0.08 264;
+    --sidebar-ring: 0.6 0.22 264;
+  }
+
+  .dark {
+    /* Dark mode — rich dark navy, vivid indigo primary */
+    --background: 0.12 0.035 264;
+    --foreground: 0.94 0.014 250;
+    --card: 0.16 0.045 264;
+    --card-foreground: 0.94 0.014 250;
+    --popover: 0.19 0.05 263;
+    --popover-foreground: 0.94 0.014 250;
+
+    --primary: 0.65 0.24 264;
+    --primary-foreground: 0.1 0.03 264;
+
+    --secondary: 0.22 0.055 262;
+    --secondary-foreground: 0.84 0.03 252;
+
+    --muted: 0.2 0.045 262;
+    --muted-foreground: 0.57 0.055 257;
+
+    /* Teal accent in dark */
+    --accent: 0.25 0.065 200;
+    --accent-foreground: 0.88 0.04 200;
+
+    --destructive: 0.65 0.24 22;
+    --destructive-foreground: 0.99 0 0;
+
+    --border: 0.26 0.055 262;
+    --input: 0.26 0.055 262;
+    --ring: 0.65 0.24 264;
+
+    --success: 0.58 0.2 150;
+    --success-foreground: 0.1 0.04 150;
+    --warning: 0.72 0.19 68;
+    --warning-foreground: 0.13 0.045 68;
+    --info: 0.58 0.2 220;
+    --info-foreground: 0.1 0.04 220;
+
+    --chart-1: 0.65 0.24 264;
+    --chart-2: 0.58 0.2 150;
+    --chart-3: 0.58 0.2 220;
+    --chart-4: 0.72 0.19 68;
+    --chart-5: 0.65 0.24 22;
+
+    /* Sidebar — deeper navy in dark mode */
+    --sidebar: 0.09 0.028 264;
+    --sidebar-foreground: 0.92 0.012 250;
+    --sidebar-primary: 0.65 0.24 264;
+    --sidebar-primary-foreground: 0.99 0 0;
+    --sidebar-accent: 0.18 0.05 264;
+    --sidebar-accent-foreground: 0.92 0.012 250;
+    --sidebar-border: 0.2 0.045 264;
+    --sidebar-ring: 0.65 0.24 264;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: oklch(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--muted-foreground) / 0.5);
+}
